@@ -1,3 +1,14 @@
+/**
+ * @file hal_encoder.c
+ * @author restartevskiy@gmail.com
+ * @brief 
+ * @version 0.1
+ * @date 2026-05-07
+ * 
+ * @copyright Copyright (c) 2026
+ * 
+ */
+
 #include "hal_encoder.h"
 #include "stm32f4xx_hal.h"
 
