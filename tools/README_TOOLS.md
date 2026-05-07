@@ -1,36 +1,68 @@
+# Setup Guide: Running the Modbus GUI  and  the COM Test on Windows
 
-1. Инсталиране на PyInstaller
+This guide provides step-by-step instructions to set up the environment and run the `modbus_gui_flash.py` program on a Windows operating system.
 
-pip install pyinstaller
+---
 
-2. Компилиране 
+## 1. Install Python
+The application requires Python 3.x to run.
+1. Visit the official [python.org](https://www.python.org/downloads/) website.
+2. Download the latest stable installer for Windows (e.g., Python 3.11 or 3.12).
+3. **IMPORTANT:** During installation, ensure you check the box **"Add Python to PATH"**. This allows you to run Python from the Command Prompt.
+4. Click **Install Now**.
 
-# Build the standalone executable
-# --onefile : Bundles everything into a single executable file
-# --windowed: Hides the console window (crucial for GUI applications)
-# --icon    : (Optional) Adds a custom icon to your application
-# --name.     : name
-/opt/homebrew/bin/python3 -m PyInstaller --noconfirm --onefile --windowed --name "STM32_Motor_Control" "modbus_gui_flash.py"
+## 2. Verify Installation
+To confirm Python is correctly installed:
+1. Open the **Command Prompt** (press `Win + R`, type `cmd`, and hit Enter).
+2. Type the following command and press Enter:
+   ```
+   python --version
+   ```
+ 
+## 3. Prepare the Python Environment
+Before installing the project dependencies, it is highly recommended to ensure that your local package manager is up to date. Open your terminal and run:
+1. Upgrade the package manager: 
+    ```
+    python -m pip install --upgrade pip
+    ```
 
-3. Къде е готовият файл?
-След като процесът завърши (отнема минута-две, защото събира целия Python интерпретатор и всички зависимости в един пакет), в папката ти ще се появят няколко нови неща:
+## 4. Install dependencies 
+   ```
+   pip install pymodbus matplotlib pyserial
+   ```
 
-Папка build/: Тук се пазят временни файлове от компилацията. Можеш да я изтриеш след това.
+## 5. How to Verify Installation
+   ```
+   pip list
+   ```
+## 6. Run the Application
 
-Файл gui_app.spec: Това е конфигурационен файл. Ако по-късно добавяш специфични външни файлове (например конфигурационни .json файлове или картинки), ще го редактираш него.
+### 6.1 Pre-run software and hardware configuration
+1. Network Setup for Modbus GUI
+- The STM32 board uses a static IP address (Default: `192.168.1.151`). Your PC must be on the same subnet to establish a Modbus TCP connection.
+    - Connect the STM32 board and your PC via an Ethernet cable to the same physical network
+    - Go to Windows Network Settings -> Ethernet -> Edit IPv4 properties.
+    Set your PC to a **Static IP**:
+    * **IP Address:** `192.168.1.10` (or any address except .151)
+    * **Subnet Mask:** `255.255.255.0`
 
-Папка dist/ (Distribution): Тук се намира твоят готов изпълним файл!
+2. Serial Setup for UART Telemtry
+    - The Python script needs to know which USB port the STM32 is connected to
+    - Open **Device Manager** in Windows and look under "Ports (COM & LPT)" to find your board's port number (e.g., `COM3`, `COM5`).
+    - Open `com_test.py` in any text editor.
+    - Locate the configuration section at the top and change the port to match yours:
+        ```python
+            COM_PORT = 'COM3'  # Change this to your actual COM port
+            BAUD_RATE = 230400    # Change this to match the STM32 baud rate
+        ```
 
-Влизаш в папката dist/, взимаш файла gui_app.exe (или gui_app за Mac/Linux) и можеш да го пратиш на всеки – той ще работи директно, дори на компютъра да няма инсталиран Python.
+### 6.2 Run program
+
+   ```     
+    python modbus_gui_flash.py
+    python com_test.py 
+
+   ```
 
 
-4. Важна експертна бележка:
-PyInstaller не е крос-компилатор. Това означава, че:
 
-Ако пуснеш командата на Windows, ще генерира .exe.
-
-Ако пуснеш командата на macOS, ще генерира .app / Mac изпълним файл.
-
-Ако пуснеш командата на Linux, ще генерира Linux ELF binary.
-
-Ако ти трябва .exe за Windows, но в момента работиш на Mac/Linux, ще трябва да пуснеш кода и компилацията в една Windows виртуална машина или на реален Windows компютър.
