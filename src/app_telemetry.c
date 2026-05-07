@@ -4,7 +4,7 @@
 #include "app_motor.h"    // For motor status
 #include "app_encoder.h"  // For antenna position
 #include "crc8.h"         // For checksum
-#include "SEGGER_RTT.h" // Pure C SEGGER library
+#include "sys_debug.h"    // SEGGER library
 
  
 

@@ -1,3 +1,5 @@
+#include "main.h"
+#include "sys_debug.h"
 #include "stm32f4xx_hal.h"
 #include "app_motor.h"
 #include "app_telemetry.h"
@@ -6,7 +8,6 @@
 #include "app_lamp.h"
 #include "app_modbus.h"
 #include "app_settings.h"
-#include "SEGGER_RTT.h"  
 #include "lwip.h"      
 #include "ethernetif.h"
 #include <string.h>

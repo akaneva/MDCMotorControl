@@ -1,6 +1,6 @@
 #include "app_settings.h"
 #include "stm32f4xx_hal.h"
-#include "SEGGER_RTT.h"
+#include "sys_debug.h"
 #include <string.h>
 
 static SystemSettings_t activeSettings;
