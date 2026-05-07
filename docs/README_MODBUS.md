@@ -21,11 +21,12 @@ The system supports the following Modbus Function Codes (FC) for accessing Holdi
 ### 3.1. Telemetry (Read-Only - FC 03)
 This block provides real-time information regarding the hardware state.
 
-| Register| Name              | Access | Scale | Description                                                                                             |
-| :---    | :---              | :---:  | :---: | :---                                                                                                    |
-| **100** | `REG_ENCODER_POS` | R      | x1    | Current absolute encoder position (in pulses). Range: `0 - 14399`.                                      |
-| **101** | `REG_MOTOR_STATE` | R      | x1    | Current motor state: <br>`0` = Stopped <br>`1` = Accelerating <br>`2` = Cruising <br>`3` = Decelerating |
-| **102** | `REG_CYCLE_TIME`  | R      | x1    | Time of the last full rotation in milliseconds (ms). Max value: `65535`.                                |
+| Register| Name               | Access | Scale | Description                                                                                             |
+| :---    | :---               | :---:  | :---: | :---                                                                                                    |
+| **100** | `REG_ENCODER_POS`  | R      | x1    | Current absolute encoder position (in pulses). Range: `0 - 14399`.                                      |
+| **101** | `REG_MOTOR_STATE`  | R      | x1    | Current motor state: <br>`0` = Stopped <br>`1` = Accelerating <br>`2` = Cruising <br>`3` = Decelerating |
+| **102** | `REG_CYCLE_TIME`   | R      | x1    | Time of the last full rotation in milliseconds (ms). Max value: `65535`.                                |
+| **103** | `REG_CYCLE_COUNTER`| R      | x1    | **Heartbeat counter:** Increments every rotation. Use this to detect updates even if cycle time is constant. |
 
 ### 3.2. Motor Control (Read / Write - FC 03, FC 06)
 This block controls the physical movement and operational parameters of the stepper motor.
@@ -37,6 +38,7 @@ This block controls the physical movement and operational parameters of the step
 | **202** | `REG_MOTOR_RPM`       | R/W    | **x10** | Target speed in RPM (Revolutions Per Minute). <br>*Example:* Writing `155` sets `15.5 RPM`.  |
 | **203** | `REG_MOTOR_ACCEL`     | R/W    | **x10** | Acceleration time in seconds. <br>*Example:* Writing `50` sets `5.0 sec`.                    |
 | **204** | `REG_MOTOR_MICROSTEPS`| R/W    | x1      | Driver microstepping resolution. Range: `0 - 65535`.                                         |
+
 
 
 ### 3.3. Telemetry & Encoder Settings (Read / Write - FC 03, FC 06)
