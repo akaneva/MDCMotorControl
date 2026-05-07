@@ -16,6 +16,7 @@
 #define REG_ENCODER_POS        100  // uint16_t: 0 - 14399
 #define REG_MOTOR_STATE        101  // uint16_t: 0=Stopped, 1=Accel, 2=Cruise, 3=Decel
 #define REG_CYCLE_TIME         102  // uint16_t: Last revolution time in milliseconds
+#define REG_CYCLE_COUNTER      103  // uint16_t: Heartbeat counter (increments every Z-pulse) 
 
 // --- WRITE/READ CONTROL REGISTERS (MOTOR) ---
 #define REG_MOTOR_CTRL         200  // uint16_t: 0=Stop, 1=Start
@@ -31,7 +32,7 @@
 #define REG_AUTO_STREAM        303  // uint16_t: 0=Disable AutoStart, 1=Enable AutoStart
 
 // Network Settings Registers (New)
-#define REG_IP_HIGH            310  // Bytes 0.1
+#define REG_IP_HIGH            310  // Bytes 0.1 
 #define REG_IP_LOW             311  // Bytes 2.3
 #define REG_NETMASK_HIGH       312
 #define REG_NETMASK_LOW        313

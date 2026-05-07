@@ -160,6 +160,7 @@ static err_t modbus_recv_cb(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err
                         case REG_MOTOR_STATE:       val = (uint16_t)App_Motor_GetState(); break;
                         case REG_MOTOR_CTRL:        val = (App_Motor_GetState() == STATE_STOPPED) ? 0 : 1; break;
                         case REG_CYCLE_TIME:        val = App_Encoder_GetCycleTime(); break;
+                        case REG_CYCLE_COUNTER:     val = App_Encoder_GetCycleCounter(); break; 
                         case REG_MOTOR_DIR:         val = ModbusCfg.motorDirection; break;
                         case REG_MOTOR_RPM:         val = (uint16_t)(ModbusCfg.targetRPM * 10.0f); break;
                         case REG_MOTOR_ACCEL:       val = (uint16_t)(ModbusCfg.accelTimeSec * 10.0f); break;

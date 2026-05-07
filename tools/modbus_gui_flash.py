@@ -10,6 +10,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 REG_ENCODER_POS   = 100
 REG_MOTOR_STATE   = 101
 REG_CYCLE_TIME    = 102  
+REG_CYCLE_COUNTER = 103
 
 REG_MOTOR_CTRL    = 200
 REG_MOTOR_DIR     = 201
@@ -127,6 +128,17 @@ class MotorControlApp:
         self.cycle_led_canvas = tk.Canvas(frame_telemetry, width=20, height=20, highlightthickness=0, borderwidth=0, relief="flat")
         self.cycle_led_canvas.grid(row=2, column=2, padx=10, sticky="e") 
         self.led_cycle = self.cycle_led_canvas.create_oval(2, 2, 18, 18, fill="gray30")
+       
+        # Row 3: Cycle Counter (FIXED)
+        ttk.Label(frame_telemetry, text="Cycle Counter:", font=("Arial", 12, "bold")).grid(row=3, column=0, sticky="w", **padding)
+        self.lbl_cycle_count = ttk.Label(frame_telemetry, text="0", font=("Arial", 14), foreground="purple")
+        self.lbl_cycle_count.grid(row=3, column=1, sticky="w", **padding)
+
+        self.canvas_count = tk.Canvas(frame_telemetry, width=20, height=20, highlightthickness=0, borderwidth=0, relief="flat")
+        self.canvas_count.grid(row=3, column=2, padx=10, sticky="e") 
+        self.led_count = self.canvas_count.create_oval(2, 2, 18, 18, fill="gray30")
+
+
 
     def build_settings_tab(self, padding):
         frame_motor = ttk.LabelFrame(self.tab_cfg, text="Motor & System Parameters")
@@ -311,6 +323,10 @@ class MotorControlApp:
         self.enc_led_canvas.itemconfig(self.led_enc, fill="lime green")
         self.root.after(100, lambda: self.enc_led_canvas.itemconfig(self.led_enc, fill="gray30"))
 
+    def blink_counter_led(self):
+        self.canvas_count.itemconfig(self.led_count, fill="lime green")
+        self.root.after(300, lambda: self.canvas_count.itemconfig(self.led_count, fill="gray30"))
+
     def update_state_led(self, state_idx):
         if state_idx > 0: 
             self.state_led_canvas.itemconfig(self.led_state, fill="lime green")
@@ -417,24 +433,46 @@ class MotorControlApp:
     def poll_telemetry(self):
         if self.is_connected:
             try:
-                response = self.client.read_holding_registers(address=REG_ENCODER_POS, count=3)
+                # Read 4 registers starting from REG_ENCODER_POS to include the new cycle counter
+                response = self.client.read_holding_registers(address=REG_ENCODER_POS, count=4)
+                
                 if not response.isError():
                     enc_pos = response.registers[0]
                     state_idx = response.registers[1]
                     cycle_time = response.registers[2]
+                    cycle_counter = response.registers[3]  # <--- Extract the heartbeat counter
+
+                    # Update GUI labels with real-time data
                     self.lbl_enc_pos.config(text=str(enc_pos))
                     self.lbl_motor_state.config(text=MOTOR_STATES[state_idx] if state_idx < len(MOTOR_STATES) else "ERROR")
                     self.lbl_cycle_time.config(text=f"{cycle_time} ms")
+                    self.lbl_cycle_count.config(text=str(cycle_counter))
+                    
+                    # Update the visual motor state LED indicator
                     self.update_state_led(state_idx)
-                    if enc_pos != self.last_enc_pos and self.last_enc_pos != -1: self.blink_enc_led()
-                    if cycle_time != self.last_cycle_time and cycle_time != 0 and self.last_cycle_time != -1:
+                    
+                    # Check if encoder position has changed to blink the position LED
+                    if enc_pos != self.last_enc_pos and self.last_enc_pos != -1: 
+                        self.blink_enc_led()
+                        
+                    # IMPORTANT: Detect a new full rotation by checking cycle_counter instead of cycle_time!
+                    # This ensures the graph updates properly even if the motor speed is perfectly constant.
+                    if cycle_counter != getattr(self, 'last_cycle_counter', -1) and cycle_counter != 0:
                         self.blink_cycle_led()
+                        self.blink_counter_led()
                         self.cycle_history.append(cycle_time)
                         self.update_graph()
+                        
+                    # Store current values for comparison in the next polling cycle
                     self.last_enc_pos = enc_pos
                     self.last_cycle_time = cycle_time
-            except Exception: pass
-            self.poll_job = self.root.after(500, self.poll_telemetry)
+                    self.last_cycle_counter = cycle_counter  # <--- Store the latest counter state
+            
+            except Exception: 
+                pass # Silently ignore read errors to prevent GUI crashes during brief timeouts
+            
+        # Schedule the next polling cycle in 500ms
+        self.poll_job = self.root.after(500, self.poll_telemetry)
 
 if __name__ == "__main__":
     root = tk.Tk()

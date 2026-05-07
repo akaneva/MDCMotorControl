@@ -26,6 +26,16 @@ void App_Encoder_SetDirection(bool reversed);
  * @return uint16_t - Time in milliseconds for one full revolution (Z-pulse to Z-pulse). Capped at 65535 ms to fit in a Modbus register.
  */
 uint16_t App_Encoder_GetCycleTime(void);
+/**
+ * @brief Gets the heartbeat counter that increments on every full revolution.
+ * @return uint16_t Current counter value.
+ */
+uint16_t App_Encoder_GetCycleCounter(void);
+
+/**
+ * @brief 
+ * 
+ */
 void App_Encoder_ResetCycleTime(void);
  
 

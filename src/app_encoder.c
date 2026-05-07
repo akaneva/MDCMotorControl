@@ -6,18 +6,16 @@
 // --- REVOLUTION TIMING VARIABLES ---
 
 
-// Stores the timestamp of the last detected Z-pulse
-static uint32_t lastZPulseTick = 0;
-static volatile uint16_t lastRevolutionTimeMs = 0;  //Store the last measured cycle time safely
-// Ensures we have at least two pulses before calculating duration
-static bool isFirstPulse = true;
+
+static uint32_t lastZPulseTick = 0;                 // Stores the timestamp of the last detected Z-pulse
+static volatile uint16_t lastRevolutionTimeMs = 0;  // Store the last measured cycle time safely
+static bool isFirstPulse = true;                    // Ensures we have at least two pulses before calculating duration
 
 
-// Variables to store 32-bit microsecond timestamps
-static uint32_t lastZPulseCaptureUs = 0;
-// Volatile because it is updated in the ISR and read in the main loop
-static volatile uint32_t lastRevolutionTimeUs = 0;
 
+static uint32_t lastZPulseCaptureUs = 0;            // Variables to store 32-bit microsecond timestamps
+static volatile uint32_t lastRevolutionTimeUs = 0;  // Volatile because it is updated in the ISR and read in the main loop
+static volatile uint16_t cycleCounter = 0;          // Heartbeat counter for  Z pulse
 
 static void DEBUG_PrintZPulseTiming(void) {
     uint32_t duration;
@@ -80,10 +78,12 @@ uint16_t App_Encoder_GetCycleTime(void) {
     // Cap the value to prevent 16-bit integer overflow during Modbus transmission
     return (timeMs > 65535) ? 65535 : (uint16_t)timeMs;
 }
-
+/**
+ * @brief 
+ * 
+ */
 static void App_Encoder_OnZeroPulse( void ) 
 {
-   
     // 1. IMMEDIATELY capture the exact hardware time (Zero latency)
     uint32_t currentCaptureUs = HAL_Encoder_GetHiresTimeUs();
     HAL_Encoder_Reset(); // Tell hardware to reset
@@ -94,9 +94,11 @@ static void App_Encoder_OnZeroPulse( void )
         // thanks to the nature of 32-bit unsigned arithmetic!
         uint32_t durationUs = currentCaptureUs - lastZPulseCaptureUs;
         
-        // Save the precise duration for the application layer
-        lastRevolutionTimeUs = durationUs;
-    } else {
+        lastRevolutionTimeUs = durationUs;  // Save the precise duration for the application layer
+        cycleCounter++;                     // Increment heartbeat counter to notify Modbus clients of a new cycle                 
+
+    } else 
+    {
         // Establish the first reference point
         isFirstPulse = false;
     }
@@ -108,7 +110,10 @@ static void App_Encoder_OnZeroPulse( void )
 
     DEBUG_PrintZPulseTiming();
 }
-
+/**
+ * @brief 
+ * 
+ */
 
 
 void App_Encoder_Init() 
@@ -156,3 +161,10 @@ void App_Encoder_ResetCycleTime(void)
 { 
 }
 
+/**
+ * @brief  Returns the heartbeat counter for revolutions.
+ * @return uint16_t The current cycle counter.
+ */
+uint16_t App_Encoder_GetCycleCounter(void) {
+    return cycleCounter;
+}
