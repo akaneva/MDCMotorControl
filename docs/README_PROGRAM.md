@@ -78,8 +78,9 @@ Operations are performed via the Command Prompt within the directory containing 
 ### For .elf files (Automatic addressing)
 ```cmd
 openocd -f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f target/stm32f4x.cfg -c "program firmware.elf verify reset exit"
-
+```
 ### For .bin files (Manual addressing required)
 Since binary files lack memory address information, the flash base address must be explicitly provided (typically `0x08000000` for STM32).
 ```cmd
 openocd -f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f target/stm32f4x.cfg -c "program firmware.bin 0x08000000 verify reset exit"
+```
