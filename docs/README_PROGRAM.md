@@ -46,6 +46,29 @@ Used by OpenOCD for JTAG communication.
 3. Select `Olimex OpenOCD JTAG ARM-USB-OCD-H (Interface 0)`.
 4. Change the driver to **WinUSB** by clicking the `Replace Driver` button.
 
+### 3.3. OpenOCD Interface Troubleshooting (VID/PID Override)
+*Important:* If OpenOCD fails to initialize with an `unable to open ftdi device with description 'Olimex...'` error, the programmer's internal EEPROM might be missing the custom Olimex string and is instead presenting standard FTDI factory identifiers.
+
+**How to check your device's VID and PID:**
+1. Open Windows **Device Manager**.
+2. Locate the device (usually under *Universal Serial Bus devices* or *Ports (COM & LPT)*).
+3. Right-click the device and select **Properties**.
+4. Navigate to the **Details** tab.
+5. From the *Property* drop-down menu, select **Hardware Ids**.
+6. Check the displayed values:
+   * Normal Olimex IDs: `VID_15BA&PID_002B`
+   * Generic FTDI IDs: `VID_0403&PID_6010`
+
+**Applying the Fix:**
+If your device shows the generic IDs (`VID_0403` and `PID_6010`), you must override the OpenOCD configuration:
+1. Open the interface configuration file in a text editor: 
+   `C:\openocd\scripts\interface\ftdi\olimex-arm-usb-ocd-h.cfg` *(adjust path as needed)*.
+2. Change the target VID and PID to the generic FTDI values:
+   Change `ftdi vid_pid 0x15ba 0x002b` to `ftdi vid_pid 0x0403 0x6010`.
+3. Comment out the specific device description check by adding a `#` prefix:
+   `# ftdi device_desc "Olimex OpenOCD JTAG ARM-USB-OCD-H"`
+4. Save the file and restart the OpenOCD command.
+
 ---
 
 ## 4. Firmware Flashing Instructions
@@ -55,3 +78,8 @@ Operations are performed via the Command Prompt within the directory containing 
 ### For .elf files (Automatic addressing)
 ```cmd
 openocd -f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f target/stm32f4x.cfg -c "program firmware.elf verify reset exit"
+
+### For .bin files (Manual addressing required)
+Since binary files lack memory address information, the flash base address must be explicitly provided (typically `0x08000000` for STM32).
+```cmd
+openocd -f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f target/stm32f4x.cfg -c "program firmware.bin 0x08000000 verify reset exit"
